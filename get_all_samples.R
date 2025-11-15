@@ -1,20 +1,42 @@
-library(dplyr)
+library(dplyr) # make pipe %>% available
+
+# Get list of samples
 samples <- scan("sample_list.txt", what = "character")
+
+# Search pattern for matching directories: anchor to the left, sample name, underscore
 patterns <- paste0("^", samples, "_")
+
+# List all files, including directories
 dirs <- list.files(include.dirs=TRUE)
+
+# Just keep the ones that match the specified patterns
 dirnames <- unlist(sapply(patterns, FUN = function(x) grepv(x, dirs)))
 
+# Bail out if something else is in there
+if (! length(samples) == length(dirnames)) {
+    message(paste0("There are ", length(samples), " sample names, but ", length(dirnames), " directory names"))
+    message("Those should be the same lengths")
+    message("Sample names:")
+    message(samples)
+    message("Directory names: ")
+    message(dirnames)
+    q("no")
+}
+
+# Create initial dataframe with gene ID and counts for first sample
 df <- read.table(paste0(dirnames[1], "/quant.genes.sf"), header = TRUE) %>% .[, c(1,5)]
+
 names(df)[2] <- samples[1]
+
+# It's Salmon output, so it's not necessary integers, but they will be now.
+df[2] <- df[2] %>% round()
 
 for (idx in c(2:length(dirnames))) {
     quant_filename <- paste0(dirnames[idx], "/quant.genes.sf")
-    sample_col <- read.table(quant_filename, header = TRUE) %>% .[,5]
+    sample_col <- read.table(quant_filename, header = TRUE) %>% .[,5] %>% round()
     
     df <- cbind(df, new_col = sample_col)
     names(df)[idx+1] <- samples[idx]
 }
-
-head(df)
 
 write.csv(df, "all_samples.csv", quote = FALSE, row.names = FALSE)

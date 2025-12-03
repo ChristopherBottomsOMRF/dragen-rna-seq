@@ -1,7 +1,13 @@
+#!/bin/env -S Rscript --vanilla
 library(dplyr) # make pipe %>% available
 
+# Read in arguments from the command line, starting after this script's name
+args <- commandArgs(trailingOnly = TRUE)
+
+sample_list_filename <- args[1]
+
 # Get list of samples
-samples <- scan("sample_list.txt", what = "character")
+samples <- scan(sample_list_filename, what = "character")
 
 # Search pattern for matching directories: anchor to the left, sample name, underscore
 patterns <- paste0("^", samples, "_")

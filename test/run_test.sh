@@ -3,7 +3,8 @@
 # Remove possible old result file
 rm -f all_samples.w_gene_symbols.csv
 
-# Load R module
+# Load slurm and R modules
+module load slurm
 module load R/4.5.1-mkl
 
 # Run test

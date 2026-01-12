@@ -11,4 +11,4 @@ module load R/4.5.1-mkl
 sbatch --wait ../combine_samples.R samples.txt refs/gencode.v44.annotation.gene_name_mapping_no_dups.csv
 
 # compare result to expected
-md5sum all_samples.w_gene_symbols.csv expected/all_samples.w_gene_symbols.csv
+md5sum all_samples.csv expected/all_samples.w_gene_symbols.csv

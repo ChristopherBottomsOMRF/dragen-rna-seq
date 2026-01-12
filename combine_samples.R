@@ -4,7 +4,8 @@ library(dplyr) # make pipe %>% available
 # Read in arguments from the command line, starting after this script's name
 args <- commandArgs(trailingOnly = TRUE)
 
-sample_list_filename <- args[1]
+sample_list_filename <- args[1]  # e.g., samples.txt
+symbols_for <- read.csv(args[2]) # e.g., gencode.v44.annotation.gene_name_mapping_no_dups.csv
 
 # Get list of samples
 samples <- scan(sample_list_filename, what = "character")
@@ -23,9 +24,9 @@ if (! length(samples) == length(dirnames)) {
     message(paste0("There are ", length(samples), " sample names, but ", length(dirnames), " directory names"))
     message("Those should be the same lengths")
     message("Sample names:")
-    message(samples)
+    message(paste0(samples, collapse = ", "))
     message("Directory names: ")
-    message(dirnames)
+    message(paste0(dirnames, collapse = ", "))
     q("no")
 }
 
@@ -44,5 +45,10 @@ for (idx in c(2:length(dirnames))) {
     df <- cbind(df, new_col = sample_col)
     names(df)[idx+1] <- samples[idx]
 }
+
+df <- df %>%
+      rename(gene_id = Name) %>%
+      left_join(symbols_for, by = "gene_id") %>%
+      relocate(gene_symbol, .after = gene_id)
 
 write.csv(df, "all_samples.csv", quote = FALSE, row.names = FALSE)
